@@ -1,19 +1,23 @@
-from django.core.serializers import serialize
-from rest_framework import viewsets, status, generics
+from django.db.models import Count
+from rest_framework import viewsets, generics
 from rest_framework.decorators import api_view
-from rest_framework.generics import RetrieveAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from main.models import Book, Order
-from main.serializers import BookSerializer
+from main.serializers import BookSerializer, OrderSerializer
 
 
 @api_view(['GET'])
 def books_list(request):
-    books = Book.objects.all()
-    serializer = BookSerializer(books, many=True)
-    return Response(serializer.data)
+    # Аннотируем количество заказов для каждой книги
+    books = Book.objects.annotate(orders_count=Count('order'))
+
+    if books.exists():
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
+    else:
+        return Response('The book list is empy! Create a book!')
 
 
 class CreateBookView(APIView):
@@ -24,23 +28,21 @@ class CreateBookView(APIView):
             serializer.save()
             return Response('Книга успешно создана')
 
-
 class BookDetailsView(generics.RetrieveAPIView):
-    # реализуйте логику получения деталей одного объявления
-    queryset = Book.objects.all()
+    queryset = Book.objects.annotate(orders_count=Count('order'))
     serializer_class = BookSerializer
 
 class BookUpdateView(generics.UpdateAPIView):
-    # реализуйте логику обновления объявления
+    queryset = Book.objects.annotate(orders_count=Count('order'))
+    serializer_class = BookSerializer
+
+
+class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 
-class BookDeleteView(DestroyAPIView):
-    # реализуйте логику удаления объявления
-    ...
-
-
 class OrderViewSet(viewsets.ModelViewSet):
-    # реализуйте CRUD для заказов
-    ...
+    # Prefetch_related для оптимизации загрузки связанных книг
+    queryset = Order.objects.prefetch_related('books')
+    serializer_class = OrderSerializer

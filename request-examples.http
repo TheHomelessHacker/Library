@@ -31,13 +31,13 @@ PATCH {{baseUrl}}/books/update/1/
 Content-Type: application/json
 
 {
-  "year": 1842
+  "year": 2005
 }
 
 ###
 
 # удаление книги
-DELETE {{baseUrl}}/books/delete/1/
+DELETE {{baseUrl}}/books/delete/6/
 Content-Type: application/json
 
 ###
@@ -47,9 +47,20 @@ POST {{baseUrl}}/orders/
 Content-Type: application/json
 
 {
-  "user_name": "Иван Петров",
+  "user_name": "Gleb",
   "days_count": 2,
-  "books": [1, 2]
+  "books": [7, 10]
+}
+
+###
+# создание заказа
+POST {{baseUrl}}/orders/
+Content-Type: application/json
+
+{
+  "user_name": "Mark",
+  "days_count": 2,
+  "books": [7]
 }
 
 ###
@@ -77,7 +88,7 @@ Content-Type: application/json
 ###
 
 # удаление книги
-DELETE {{baseUrl}}/orders/1/
+DELETE {{baseUrl}}/orders/6/
 Content-Type: application/json
 
 ###
